@@ -1,0 +1,177 @@
+openapi: 3.0.0
+info:
+  title: "RP Flask REST API"
+  description: "An API about people and notes"
+  version: "1.0.0"
+
+servers:
+  - url: "/api"
+components:
+  schemas:
+    Register:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - username
+        - email
+        - password
+    Login:
+      type: "object"
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: "string"
+        password:
+          type: "string"
+    EditProfile:
+      type: object
+      properties:
+        username:
+          type: string
+        about_me:
+          type: string
+      required:
+        - username
+        - about_me
+    ProfileOps:
+      type: object
+      required:
+        - username
+        - email
+      properties:
+        username:
+          type: "string"
+        email:
+          type: "string"
+
+  securitySchemes:
+    jwt_auth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      x-bearerInfoFunc: jwt_manager.security_handler
+  parameters:
+    username:
+      name: "username"
+      description: "username of the person to get"
+      in: path
+      required: True
+      schema:
+        type: "string"
+    email:
+      name: "email"
+      description: "email of the person to get"
+      in: path
+      required: True
+      schema:
+        type: "string"
+paths:
+  /user/register:
+    post:
+      operationId: user_auth.register
+      tags:
+        - "Sign-Up"
+      summary: "Signs up a user"
+      requestBody:
+          description: "Sign up to continue"
+          required: true
+          content:
+            application/json:
+              schema:
+                x-body-name: "register"
+                $ref: "#/components/schemas/Register"
+      responses:
+        "200":
+          description: "User Successfully created"
+  /user/login:
+    post:
+      operationId: user_auth.login
+      tags:
+        - Log-in
+      summary: "Log in for access token "
+      requestBody:
+          description: "Logs in a user and creates access token"
+          required: True
+          content:
+            application/json:
+              schema:
+                x-body-name: "login"
+                $ref: "#/components/schemas/Login"
+      responses:
+        "201":
+          description: "Successfully logged in"
+  /user/logout:
+    delete:
+      operationId: user_auth.logout
+      tags:
+        - log-out
+      summary: "logs out a user"
+      security:
+        - jwt_auth: []
+      responses:
+        '200':
+          description: Logout successful
+  /user/profile/update:
+    put:
+      operationId: profile.update_profile
+      tags:
+        - Profile
+      summary: "Updates a user profile"
+      requestBody:
+          description: "Updates a user profile"
+          required: True
+          content:
+            application/json:
+              schema:
+                x-body-name: "updateprofile"
+                $ref: "#/components/schemas/EditProfile"
+      security:
+        - jwt_auth: ['secret']
+      responses:
+        '200':
+          description: Profile Updated successfully
+  /user/{username}/profile/get:
+    get:
+      operationId: profile.get_profile
+      tags:
+        - Profile
+      summary: "Retreives a user profile"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the profile to retrieve
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: []
+      responses:
+        '200':
+          description: Profile Retreived successfully
+  /user/{username}/profile/delete:
+    delete:
+      operationId: profile.delete_profile
+      tags:
+        - Profile
+      summary: "Deletes a user profile"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the profile to retrieve
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: []
+      responses:
+        '200':
+          description: Profile has been deleted successfully
+
