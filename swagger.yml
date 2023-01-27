@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: "RP Flask REST API"
-  description: "An API about people and notes"
+  description: "An API about todo Application"
   version: "1.0.0"
 
 servers:
@@ -41,17 +41,117 @@ components:
       required:
         - username
         - about_me
-    ProfileOps:
+    EditStatus:
       type: object
       required:
         - username
-        - email
+        - task_name
+        - subtask_title
+        - _status
       properties:
         username:
-          type: "string"
-        email:
-          type: "string"
-
+          type: string
+        task_name:
+          type: string
+        subtask_title:
+          type: string
+        _status:
+          type: string
+          enum:
+            - unassigned
+            - assigned
+            - started
+            - in-progress
+            - done
+            - null
+    EditTaskData:
+      type: object
+      properties:
+        username:
+          type: string
+        old_title:
+          type: string
+        new_title:
+          type: string
+        old_task_name:
+          type: string
+        new_task_name:
+          type: string
+      required:
+        - username
+        - old_title
+        - new_title
+        - old_task_name
+        - new_task_name
+    TaskData:
+      type: object
+      properties:
+        username:
+          type: string
+        title:
+          type: string
+        task_name:
+          type: string
+      required:
+        - username
+        - title
+        - task_name
+    SubtaskData:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - unassigned
+            - assigned
+            - started
+            - in-progress
+            - done
+            - null
+        username:
+          type: string
+        subtask_title:
+          type: string
+        task_name:
+          type: string
+        due_date:
+          type: string
+        content:
+          type: string
+      required:
+        - status
+        - username
+        - task_name
+        - subtask_title
+        - due_date
+    EditSubtaskData:
+      type: object
+      properties:
+        new_status:
+          type: string
+          enum:
+            - unassigned
+            - assigned
+            - started
+            - in-progress
+            - done
+            - null
+        username:
+          type: string
+        old_subtask_title:
+          type: string
+        new_subtask_title:
+          type: string
+        new_due_date:
+          type: string
+        task_name:
+          type: string
+        new_content:
+          type: string
+      required:
+        - username
+        - old_subtask_title
+        - task_name
   securitySchemes:
     jwt_auth:
       type: http
@@ -78,13 +178,13 @@ paths:
     post:
       operationId: user_auth.register
       tags:
-        - "Sign-Up"
+        - "Authentication"
       summary: "Signs up a user"
       requestBody:
           description: "Sign up to continue"
           required: true
           content:
-            application/json:
+            application/x-www-form-urlencoded:
               schema:
                 x-body-name: "register"
                 $ref: "#/components/schemas/Register"
@@ -95,30 +195,19 @@ paths:
     post:
       operationId: user_auth.login
       tags:
-        - Log-in
+        - "Authentication"
       summary: "Log in for access token "
       requestBody:
           description: "Logs in a user and creates access token"
           required: True
           content:
-            application/json:
+            application/x-www-form-urlencoded:
               schema:
                 x-body-name: "login"
                 $ref: "#/components/schemas/Login"
       responses:
         "201":
           description: "Successfully logged in"
-  /user/logout:
-    delete:
-      operationId: user_auth.logout
-      tags:
-        - log-out
-      summary: "logs out a user"
-      security:
-        - jwt_auth: []
-      responses:
-        '200':
-          description: Logout successful
   /user/profile/update:
     put:
       operationId: profile.update_profile
@@ -129,7 +218,7 @@ paths:
           description: "Updates a user profile"
           required: True
           content:
-            application/json:
+            application/x-www-form-urlencoded:
               schema:
                 x-body-name: "updateprofile"
                 $ref: "#/components/schemas/EditProfile"
@@ -174,4 +263,420 @@ paths:
       responses:
         '200':
           description: Profile has been deleted successfully
+  /user/task/create:
+    post:
+      operationId: tasks.create_task
+      tags:
+        - Task
+      summary: "Creates a Task"
+      requestBody:
+        description: "A user Creates a Task"
+        required: True
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              x-body-name: "task-data"
+              $ref: "#/components/schemas/TaskData"
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: Task Created successfully
+  /user/task/update:
+    put:
+      operationId: tasks.update_task
+      tags:
+        - Task
+      summary: "Updates a user Task"
+      requestBody:
+        description: "A user Updates a Task"
+        required: True
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              x-body-name: "taskdata"
+              $ref: "#/components/schemas/EditTaskData"
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: Profile Retreived successfully
+  /user/{username}/tasks/{task_name}/get:
+    get:
+      operationId: tasks.get_task
+      tags:
+        - Task
+      summary: "Retrieves a user task"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the user
+          required: true
+          schema:
+            type: string
+        - name: task_name
+          in: path
+          description: The name of the task
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: Task Retrieved successfully
+  /user/{username}/tasks/get/all:
+    get:
+      operationId: tasks.get_all_tasks
+      tags:
+        - Task
+      summary: "Retrieves all user's task"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the user
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: Task Retrieved successfully
+  /user/{username}/tasks/{task_name}/delete:
+    delete:
+      operationId: tasks.delete_task
+      tags:
+        - Task
+      summary: "Deletes a user's Task"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the User
+          required: true
+          schema:
+            type: string
+        - name: task_name
+          in: path
+          description: The task_name of the task to delete
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: Task has been deleted successfully
+  /user/{username}/tasks/delete/all:
+    delete:
+      operationId: tasks.clear_all_user_tasks
+      tags:
+        - Task
+      summary: "Deletes all user's Tasks"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the user
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: User Tasks has been deleted successfully
+  /user/tasks/{task_name}/assign/{assign_to}:
+    put:
+      operationId: tasks.assign_task
+      tags:
+        - Assign
+      summary: "Assign tasks"
+      parameters:
+        - name: assign_to
+          in: path
+          description: Assign task to a user
+          required: true
+          schema:
+            type: string
+        - name: task_name
+          in: path
+          description: Assign task to a user
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: User Task has been assigned successfully
+  /user/tasks/{task_name}/unassign/{unassigned_from}:
+    put:
+      operationId: tasks.unassign_task
+      tags:
+        - Assign
+      summary: "Unassign tasks"
+      parameters:
+        - name: unassigned_from
+          in: path
+          description: unassign task from a user
+          required: true
+          schema:
+            type: string
+        - name: task_name
+          in: path
+          description: Unassign task to a user
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: User Task has been successfully unassigned
+  /user/task/subtask/create:
+    post:
+      operationId: subtasks.create_subtask
+      tags:
+        - Subtask
+      summary: "creates a subtask"
+      requestBody:
+        description: "subtask Data to create a task subtask"
+        required: True
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              x-body-name: "subtask"
+              $ref: "#/components/schemas/SubtaskData"
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: User SubTask has been successfully created
+  /user/tasks/subtask/update:
+    put:
+      operationId: subtasks.update_subtask
+      tags:
+        - Subtask
+      summary: "updates a subtask"
+      requestBody:
+        description: "subtask Data to create a task subtask"
+        required: True
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              x-body-name: "subtask"
+              $ref: "#/components/schemas/EditSubtaskData"
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: User SubTask has been successfully updated
+  /user/{username}/task/{task_name}/subtask/{subtask_title}/get:
+    get:
+      operationId: subtasks.get_subtask
+      tags:
+        - Subtask
+      summary: "Retrieves a user subtask"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the user that created the subtask
+          required: true
+          schema:
+            type: string
+        - name: task_name
+          in: path
+          description: The name of the task
+          required: true
+          schema:
+            type: string
+        - name: subtask_title
+          in: path
+          description: The name of the subtask
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: subtask Retrieved successfully
+  /user/{username}/tasks/subtask/all:
+    get:
+      operationId: subtasks.get_all_subtasks
+      tags:
+        - Subtask
+      summary: "Retrieves all user subtask"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the user that created the subtasks
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: all subtasks Retrieved successfully
+  /user/{username}/task/{task_name}/subtask/{subtask_title}/delete:
+    delete:
+      operationId: subtasks.delete_subtask
+      tags:
+        - Subtask
+      summary: "Deletes a user subtask"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the user that created the subtask
+          required: true
+          schema:
+            type: string
+        - name: task_name
+          in: path
+          description: The name of the task
+          required: true
+          schema:
+            type: string
+        - name: subtask_title
+          in: path
+          description: The title of the subtask
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: subtask Delete successfully
+  /user/tasks/{task_name}/subtask/{subtask_title}/assign/{assign_to}:
+    put:
+      operationId: subtasks.assign_subtask
+      tags:
+        - Assign
+      summary: "Assigns a user subtask"
+      parameters:
+        - name: assign_to
+          in: path
+          description: The username of the user that is about to be assigned subtask
+          required: true
+          schema:
+            type: string
+        - name: task_name
+          in: path
+          description: The name of the task
+          required: true
+          schema:
+            type: string
+        - name: subtask_title
+          in: path
+          description: The title of the subtask
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: subtask assigned successfully
+  /user/tasks/{task_name}/subtask/{subtask_title}/unassign/{unassign_from}:
+    put:
+      operationId: subtasks.unassign_subtask
+      tags:
+        - Assign
+      summary: "Unassign a user subtask"
+      parameters:
+        - name: unassign_from
+          in: path
+          description: The username of the user that is about to be unassigned subtask
+          required: true
+          schema:
+            type: string
+        - name: task_name
+          in: path
+          description: The name of the task
+          required: true
+          schema:
+            type: string
+        - name: subtask_title
+          in: path
+          description: The title of the subtask
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: subtask assigned successfully
+  /user/task/subtask/status:
+    put:
+      operationId: subtasks.update_subtask_status
+      tags:
+        - Update Status
+      summary: "Updates a user subtask status"
+      requestBody:
+        description: "subtask Data to update a task subtask status"
+        required: True
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              x-body-name: "update status"
+              $ref: "#/components/schemas/EditStatus"
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: subtask status updated successfully
+  /user/{username}/tasks/assigned/all:
+    get:
+      operationId: subtasks.show_assigned_tasks
+      tags:
+        - Assign
+      summary: "Retrieves a list of assigned tasks"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the profile
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: list of assigned tasks retrieved successfully
+
+  /user/{username}/tasks/{task_name}assigned/all:
+    get:
+      operationId: subtasks.show_assigned_users
+      tags:
+        - Assign
+      summary: "Retrieves a list of assigned users for a task"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the account
+          required: true
+          schema:
+            type: string
+        - name: task_name
+          in: path
+          description: The task_name of the task
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: list of assigned users retrieved successfully
+
+
+
+
+
+
+
+
 

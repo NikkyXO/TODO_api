@@ -1,9 +1,7 @@
 from flask import render_template
 import connexion
-from flask_jwt_extended import JWTManager, jwt_required
 from config import Config
 from database import Base, engine
-from user_auth import bearer_info_func
 from jwt_manager import jwt
 
 options = {'swagger_ui': True,

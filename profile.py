@@ -1,12 +1,9 @@
-from datetime import datetime
 from flask import request, jsonify
 from database import SessionLocal
 from models import User, Profile
 from flask_api import status
-from flask_jwt_extended import (
-    create_access_token, jwt_required, set_access_cookies,
-    get_jwt, unset_jwt_cookies, verify_jwt_in_request, current_user
-)
+from flask_jwt_extended import jwt_required
+import json
 
 db = SessionLocal()
 
@@ -16,52 +13,51 @@ db = SessionLocal()
 
 # @jwt_required()
 def update_profile():
+    """	    It updates the user profile object
+        :return: A response object
     """
-	It creates additional field to  user object
-	:param user_data: This is the data that is passed to the function
-	:return: A response object
-	"""
-    user_data = request.get_json()
 
-    get_profile = db.query(Profile).filter(Profile.username == user_data["username"]).first()
-    # return get_profile
-    if not get_profile:
-        content = {"message": "Profile doesnt exist."}
-        return content, status.HTTP_400_BAD_REQUEST
+    username = request.form["username"]
+    about_me = request.form["about_me"]
+
+    user = db.query(User).filter(User.username == username).first()
+    get_user_profile = db.query(Profile).filter(Profile.user_id == user.id).first()
+
+    # return get_user_profile
+    if not get_user_profile:
+        return {"message": "Profile doesnt exist."}, status.HTTP_400_BAD_REQUEST
 
     # gets user
     user_account = db.query(User).filter(
-        User.username == user_data.get("username")).first()
+        User.username == username).first()
 
-    user_profile = Profile(
-        about_me=user_data.get("about_me"),
-        user_id=user_account.id,
-        username="nike2"
-    )
-    db.add(user_profile)
+    get_user_profile.about_me = about_me
+
+    db.add(get_user_profile)
     db.commit()
-    db.refresh(user_profile)
 
-    return jsonify(user_profile.to_dict()), 200
+    db.refresh(get_user_profile)
+    user_account.profile = get_user_profile
+    db.add(user_account)
+    db.commit()
+
+    return jsonify(my_profile=get_user_profile.to_dict()), 200
+
+
+# @jwt_required()
+def get_profile(username):
+    user = db.query(User).filter(User.username == username).first()
+    get_user_profile = db.query(Profile).filter(Profile.user_id == user.id).first()
+
+    if not get_user_profile:
+        return {"message": "Profile doesnt exist."}, status.HTTP_400_BAD_REQUEST
+    return get_user_profile.to_dict(), 200
 
 
 @jwt_required()
-def get_profile(username):  # username
-    get_profile = db.query(Profile).filter(
-        Profile.username == username).first()
+def delete_profile(username):  # username
 
-    if not get_profile:
-        content = {"message": "Profile doesnt exist."}
-        return content, status.HTTP_400_BAD_REQUEST
-    return get_profile.to_dict(), 200
-
-
-@jwt_required()
-def delete_profile():  # username
-
-    user_data = request.get_json()
-    user_account = db.query(User).filter(
-        User.username == user_data.get("username")).first()
+    user_account = db.query(User).filter(User.username == username).first()
     if user_account:
         get_profile_obj = db.query(Profile).filter(Profile.user_id == user_account.id).first()
 
@@ -71,15 +67,12 @@ def delete_profile():  # username
         db.delete(get_profile_obj)
         db.commit()
 
-        # also deletes user account
-        db.delete(user_account)
+        # also deletes user account.profile
+        del user_account.profile
         db.commit()
-        return {"message": "Account and profile has been successfully deleted"}
+        return {"message": "Profile has been successfully deleted"}
 
-    return {"message": f"Account with username {user_data} does not exist."}, \
+    return {"message": f"Account with username {username} does not exist."}, \
         status.HTTP_400_BAD_REQUEST
 
 
-@jwt_required()
-def assign_to_profile():
-    pass

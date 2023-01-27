@@ -1,0 +1,34 @@
+{
+  "my_profile": {
+    "about_me": "i love red jeans and huzzle",
+    "username": "tomi"
+  }
+}
+{
+  "task": [
+    {
+      "assigned_users": [],
+      "id": "d7657da0-0a75-4009-9e4e-c0866df3acbe",
+      "month": 1,
+      "subtasks": [],
+      "task_name": "domestic",
+      "title": "the red hat is domestic",
+      "user_id": "0318cc54-b4ca-48cd-b9ac-74dbff75f1ba"
+
+      "assigned_users": [],
+      "id": "eaf82169-0822-486b-8dab-26ff39226e44",
+      "month": 1,
+      "subtasks": [],
+      "task_name": "Redhat's game",
+      "title": "hate the game, but love it",
+      "user_id": "0318cc54-b4ca-48cd-b9ac-74dbff75f1ba"
+
+
+"new_subtassk": {
+    "assigned_to": null,
+    "content": "flyovers are great",
+    "created": "2023-01-27T11:11:07",
+    "due_date": "2023-03-12 00:00:00",
+    "last_seen": "2023-01-27T11:11:07",
+    "task_id": "d7657da0-0a75-4009-9e4e-c0866df3acbe",
+    "title": "flyovers"

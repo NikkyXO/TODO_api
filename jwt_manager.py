@@ -8,7 +8,7 @@ jwt = JWTManager()
 
 # print(f"user_id---->{user_id}") print(f"user---->{user}")
 
-# def decodetoken(token):
+# def decode_token_fxn(token):
 # 	decoded_token =
 # 	user_id = decoded_token.get("sub")
 # 	user = User.get_by_id(user_id)
