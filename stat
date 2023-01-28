@@ -14,7 +14,8 @@
       "task_name": "domestic",
       "title": "the red hat is domestic",
       "user_id": "0318cc54-b4ca-48cd-b9ac-74dbff75f1ba"
-
+    },
+    {
       "assigned_users": [],
       "id": "eaf82169-0822-486b-8dab-26ff39226e44",
       "month": 1,
@@ -22,7 +23,7 @@
       "task_name": "Redhat's game",
       "title": "hate the game, but love it",
       "user_id": "0318cc54-b4ca-48cd-b9ac-74dbff75f1ba"
-
+    }
 
 "new_subtassk": {
     "assigned_to": null,
@@ -32,3 +33,16 @@
     "last_seen": "2023-01-27T11:11:07",
     "task_id": "d7657da0-0a75-4009-9e4e-c0866df3acbe",
     "title": "flyovers"
+
+"new_subtassk": {
+task_name: task1
+}
+    "assigned_to": null,
+    "content": "subtask1 content",
+    "created": "2023-01-27T16:53:31",
+    "due_date": "2023-01-31 00:00:00",
+    "last_seen": "2023-01-27T16:53:31",
+    "task_id": "ae402de2-4429-4032-a768-83c11a60d540",
+    "title": "subtask1 title"
+  }
+}

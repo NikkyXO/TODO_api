@@ -30,8 +30,8 @@ class User(Base):
     username = Column(String(64), index=True, unique=True, nullable=False)
     email = Column(String(20), index=True, unique=True, nullable=False)
     password = Column(String(500), nullable=True)
+    assigned_tasks = relationship("Task", secondary="assigned_tasks")
     profile = relationship("Profile", uselist=False, back_populates="user")
-    assigned_tasks = relationship('Task', secondary='assigned_tasks', back_populates='assigned_users', lazy=True)
     connections = relationship("Connections", back_populates="connected_user")
     created_at = Column(DateTime, default=datetime.utcnow)
     last_modified = Column(DateTime, default=datetime.utcnow,
@@ -49,8 +49,7 @@ class User(Base):
 
     def to_dict(self):
         return {'email': self.email,
-                'created': self.created,
-                'title': self.title,
+                'created': self.created_at,
                 'username': self.username,
                 'assigned_tasks': self.assigned_tasks,
                 'last_seen': self.last_modified}
@@ -152,10 +151,17 @@ class Task(Base):
         return json.loads(json.dumps(self.to_dict(), default=str))
 
 
-assigned_tasks = Table('assigned_tasks', Base.metadata,
-                       Column('user_id', String(255), ForeignKey('users.id')),
-                       Column('task_id', String(255), ForeignKey('tasks.id')),
-                       Column('subtask_id', String(255), ForeignKey('subtasks.id')))
+# assigned_tasks = Table('assigned_tasks', Base.metadata,
+#                        Column('user_id', String(255), ForeignKey('users.id')),
+#                        Column('task_id', String(255), ForeignKey('tasks.id')),
+#                        Column('subtask_id', String(255), ForeignKey('subtasks.id')))
+
+
+class AssignedTasks(Base):
+    __tablename__ = 'assigned_tasks'
+    user_id = Column(String(255), ForeignKey('users.id'), primary_key=True)
+    task_id = Column(String(255), ForeignKey('tasks.id'), primary_key=True)
+    subtask_id = Column(String(255), ForeignKey('subtasks.id'))
 
 
 class Subtask(Base):
@@ -170,7 +176,7 @@ class Subtask(Base):
     task_id = Column(ForeignKey("tasks.id"), nullable=False)
     user_id = Column(ForeignKey("users.id"), nullable=False)
     assigned_to = Column(String(20), ForeignKey("users.username"))
-    content = Column(String(30), nullable=True)
+    content = Column(String(255), nullable=True)
     status = Column(Enum('unassigned', 'assigned', 'started',
                          'in-progress', 'done', 'null', name='tasks_status'),
                     server_default='unassigned')

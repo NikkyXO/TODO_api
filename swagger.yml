@@ -99,15 +99,6 @@ components:
     SubtaskData:
       type: object
       properties:
-        status:
-          type: string
-          enum:
-            - unassigned
-            - assigned
-            - started
-            - in-progress
-            - done
-            - null
         username:
           type: string
         subtask_title:
@@ -119,7 +110,6 @@ components:
         content:
           type: string
       required:
-        - status
         - username
         - task_name
         - subtask_title
@@ -127,15 +117,6 @@ components:
     EditSubtaskData:
       type: object
       properties:
-        new_status:
-          type: string
-          enum:
-            - unassigned
-            - assigned
-            - started
-            - in-progress
-            - done
-            - null
         username:
           type: string
         old_subtask_title:
@@ -501,7 +482,7 @@ paths:
       responses:
         '200':
           description: subtask Retrieved successfully
-  /user/{username}/tasks/subtask/all:
+  /user/{username}/tasks/{task_name}/subtask/all:
     get:
       operationId: subtasks.get_all_subtasks
       tags:
@@ -511,6 +492,12 @@ paths:
         - name: username
           in: path
           description: The username of the user that created the subtasks
+          required: true
+          schema:
+            type: string
+        - name: task_name
+          in: path
+          description: The name of the task
           required: true
           schema:
             type: string
@@ -646,7 +633,6 @@ paths:
       responses:
         '200':
           description: list of assigned tasks retrieved successfully
-
   /user/{username}/tasks/{task_name}assigned/all:
     get:
       operationId: subtasks.show_assigned_users
@@ -671,6 +657,79 @@ paths:
       responses:
         '200':
           description: list of assigned users retrieved successfully
+  /user/{username}/connections/{to_add}/{c_type}:
+    post:
+      operationId: connections.add_connection
+      tags:
+        - Connection
+      summary: "Adds a connection to a user"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the account
+          required: true
+          schema:
+            type: string
+        - name: to_add
+          in: path
+          description: The name of the new connection
+          required: true
+          schema:
+            type: string
+        - name: c_type
+          in: path
+          description: The connection type to be added
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: connection added successfully
+  /user/{username}/connections:
+    get:
+      operationId: connections.get_connected_users
+      tags:
+        - Connection
+      summary: "Gets all connected users"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the account
+          required: true
+          schema:
+            type: string
+
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: connections retrieved successfully
+  /user/{username}/connections/{to_remove}:
+    put:
+      operationId: connections.remove_connected_user
+      tags:
+        - Connection
+      summary: "Removes a connected user"
+      parameters:
+        - name: username
+          in: path
+          description: The username of the account
+          required: true
+          schema:
+            type: string
+        - name: to_remove
+          in: path
+          description: The username of connection to remove
+          required: true
+          schema:
+            type: string
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
+          description: connection removed successfully
 
 
 
