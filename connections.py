@@ -4,7 +4,7 @@ from models import User, Connections
 from sqlalchemy.exc import IntegrityError
 from flask_api import status
 from flask_jwt_extended import (
-    jwt_required
+    jwt_required, get_jwt_identity
 )
 from flask import jsonify
 
