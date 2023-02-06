@@ -3,10 +3,9 @@ from models import User, Profile
 from sqlalchemy.exc import IntegrityError
 from flask_api import status
 from flask_jwt_extended import (
-    create_access_token, jwt_required, get_jwt_identity
+    create_access_token, jwt_required
 )
 from flask import jsonify, request
-from jwt_manager import jwt
 
 db = SessionLocal()
 
@@ -14,7 +13,6 @@ db = SessionLocal()
 def register():
     """
     It creates a new user
-    :param : The request object
     :return: A response object
     """
     try:
@@ -27,7 +25,7 @@ def register():
         check_email_exist = db.query(User).filter(User.email == email).first()
 
         if check_username_exist:
-            return {"message": "Username already exist"}, status.HTTP_400_BAD_REQUEST
+            return {"message": f"Account with username {username} already exist"}, status.HTTP_400_BAD_REQUEST
 
         if check_email_exist:
             return {"message": "Email  already taken"}, status.HTTP_400_BAD_REQUEST
@@ -45,7 +43,7 @@ def register():
 
         db.add(profile_obj)
         db.commit()
-        return {"message": "User Created."}, status.HTTP_201_CREATED
+        return {"message": "User Created Successfully."}, status.HTTP_201_CREATED
 
     except IntegrityError as e:
         db.rollback()
@@ -55,7 +53,7 @@ def register():
 def login():
     """
     It takes in a request and input data, validates the input data
-    the password is correct, and returns an an access token
+    the password is correct, and returns  an access token
     :request body input_data: The data that is passed to the function
     :return: A dictionary with the keys: access token,  message, status
     """
@@ -78,32 +76,26 @@ def login():
         return jsonify(message=str(e)), status.HTTP_400_BAD_REQUEST
 
 
-# utils
 @jwt_required()
-def protected_api():
-    new_user = get_jwt_identity()
-    return jsonify(logged_in_as=new_user), 200
-
-
-# JWT ID (JTI): unique identifier
-@jwt_required()
-def logout():
-    jti = get_jwt_identity()
-    jwt.revoke_token(jti)
-    return jsonify({"msg": "Successfully logged out"}), 200
-
+# def logout():
+#     """
+#         It logs out a user
+#         :return: A response object
+#     """
+#     jti = get_jwt_identity()
+#     jwt.revoke_token(jti)
+#     return jsonify({"msg": "Successfully logged out"}), 200
 
 # to implement : delete account
 
 @jwt_required()
 def delete_account(email, username):
     """
-        It takes in a request and input data, validates the input data
-        the password is correct, and returns an an access token
-        :request body input_data: The data that is passed to the function
-        :return: A dictionary with the keys: access token,  message, status
+        It takes parameters and deletes a user account
+        :param email: The email of the user
+        :param username: The name of the user
+        :return: A Response Object.
     """
-
     try:
         user_account = db.query(User).filter(User.email == email,
                                              User.username == username).first()
@@ -118,4 +110,3 @@ def delete_account(email, username):
     except IntegrityError as e:
         db.rollback()
         return jsonify(message=str(e)), status.HTTP_400_BAD_REQUEST
-

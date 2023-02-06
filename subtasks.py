@@ -5,31 +5,26 @@ from flask_api import status
 from sqlalchemy.exc import IntegrityError
 from flask_jwt_extended import jwt_required
 from dateutil.parser import parse
+from flask_json import json_response
 
 db = SessionLocal()
 
 
-# status
-# - username
-# - task_name
-# - subtask_title
-# - due_date
-# content
-@jwt_required()
 def create_subtask():
     """
         It takes in a request and input data, validates the input data
-        the password is correct, and returns an an access token
+        and creates a new subtask
         :request body input_data: The data that is passed to the function
-        :return: A dictionary with the keys: access token,  message, status
+        :return: A dictionary of new subtask
     """
+
     content = request.form["content"]
     due_date = request.form["due_date"]
+    username = request.form["username"]
     due_date = parse(due_date)
 
     subtask_title = request.form["subtask_title"]
     task_name = request.form["task_name"]
-    username = request.form["username"]
 
     try:
         task = db.query(Task).filter(Task.task_name == task_name).first()
@@ -62,14 +57,15 @@ def create_subtask():
 
 
 # revise endpoint with updates
-@jwt_required()
+
 def update_subtask():
     """
         It takes in a request and input data, validates the input data
-        the password is correct, and returns an an access token
+        and updates a subtask
         :request body input_data: The data that is passed to the function
-        :return: A dictionary with the keys: access token,  message, status
+        :return: A dictionary of updated subtask
     """
+
     new_content = request.form["new_content"]
     new_due_date = request.form["new_due_date"]
 
@@ -107,20 +103,21 @@ def update_subtask():
                 return jsonify(new_subtask=user_subtask.to_json())
         return jsonify({'message': 'Task or user not found'}), status.HTTP_404_NOT_FOUND
 
-
     except IntegrityError as e:
         db.rollback()
         return jsonify(message=str(e)), status.HTTP_400_BAD_REQUEST
 
 
-@jwt_required()
 def get_subtask(username, task_name, subtask_title):
     """
-        It takes in a request and input data, validates the input data
-        the password is correct, and returns an an access token
-        :request body input_data: The data that is passed to the function
-        :return: A dictionary with the keys: access token,  message, status
+        It takes request and parameters and gets
+        the subtask for a  specific task
+        :param task_name: The name of the task
+        :param username: The name of the user
+        :param subtask_title: The title of the sub-task
+        :return: A json format of  subtask.
     """
+
     try:
         user = db.query(User).filter(User.username == username).first()
         task = db.query(Task).filter(Task.task_name == task_name).first()
@@ -139,25 +136,44 @@ def get_subtask(username, task_name, subtask_title):
         return jsonify(message=str(e)), status.HTTP_400_BAD_REQUEST
 
 
-@jwt_required()
-def get_all_subtasks(username, task_name):  # added extra param
+# REVISE
+# Endpoint lags
+def get_all_subtasks(username, task_name):
+    """
+        It takes request and parameters and gets all
+        the subtask for a task
+        :param task_name: The name of the task
+        :param username: The name of the user
+        :return: A json format of  all subtasks.
+    """
+
     user = db.query(User).filter(User.username == username).first()
+
     task = db.query(Task).filter(Task.task_name == task_name).first()
-    # return user.to_json()
-    # return jsonify(get_user_tasks)
+
     if user and task:
+
         subtasks = db.query(Subtask).filter(Subtask.task_id == task.id).all()
-        list_subtasks = []
-        for sub in subtasks:
-            list_subtasks.append(sub.to_json())
+        if subtasks:
+            all_subtasks = [sub.to_json() for sub in subtasks]
+            #  _all_subtasks = json.dumps(subtasks, indent=4, cls=CustomEncoder)
 
-        return jsonify(subtasks=list_subtasks), status.HTTP_200_OK
+            return json_response(message=all_subtasks), status.HTTP_200_OK
+        return json_response(error="Subtasks not found"), status.HTTP_404_NOT_FOUND
 
-    return jsonify(message=f"No user or subtask for {username}" and {task_name}), status.HTTP_404_NOT_FOUND
+    return jsonify(msg="No user or subtask "), status.HTTP_404_NOT_FOUND
 
 
-@jwt_required()
 def delete_subtask(username, task_name, subtask_title):
+    """
+        It takes request and parameters and deletes
+        the subtask for a  specific task
+        :param task_name: The name of the task
+        :param username: The name of the user
+        :param subtask_title: The title of the subtask
+        :return: A Response Object.
+    """
+
     user = db.query(User).filter(User.username == username).first()
     task = db.query(Task).filter(Task.task_name == task_name).first()
     if user and task:
@@ -171,33 +187,53 @@ def delete_subtask(username, task_name, subtask_title):
         else:
             return jsonify(message="No subtask exist"), status.HTTP_404_NOT_FOUND
 
-    return jsonify(message=f"No user or subtask for {username}"), status.HTTP_404_NOT_FOUND
+    return jsonify(message=f"No user or subtask found"), status.HTTP_404_NOT_FOUND
 
 
 # revise this, double-same field
-@jwt_required()
+
 def assign_subtask(assign_to, task_name, subtask_title):
+    """
+        It takes request and parameters and assigns
+        the subtask for a task
+        :param assign_to: The name of the user to be assigned subtask
+        :param task_name: The name of the task
+        :param subtask_title: The title of the subtask
+        :return: A Response Object.
+    """
+
     try:
         task = db.query(Task).filter(Task.task_name == task_name).first()
-        assignee = db.query(User).filter(User.username == assign_to).first()
-        if task and assignee:
-            subtask = db.query(Subtask).filter(Subtask.task == task,
+        assignee_exists = db.query(User).filter(User.username == assign_to).first()
+        print("task--->", task)
+        print("assignee_exists:", assignee_exists)
+        if task and assignee_exists:
+            subtask = db.query(Subtask).filter(Subtask.task_id == task.id,
                                                Subtask.title == subtask_title).first()
 
-            task_to_assign = AssignedTasks(user_id=assignee.id,
-                                           task_id=task.id,
-                                           subtask_id=subtask.id
+            if not subtask:
+                return jsonify(message=f"No subtask with title '{subtask_title}' "), status.HTTP_404_NOT_FOUND
+
+            been_assigned = db.query(AssignedTasks).filter(AssignedTasks.subtask_id == subtask.id).first()
+            if been_assigned:
+                return jsonify(
+                    message=f"Task: {subtask_title}, has been previously assigned "), \
+                    status.HTTP_400_BAD_REQUEST
+
+            task_to_assign = AssignedTasks(user_id=assignee_exists.id,
+                                           subtask_id=subtask.id,
+                                           task_id=task.id
                                            )
             db.add(task_to_assign)
             db.commit()
 
-            subtask.assigned_to = assignee
+            subtask.assigned_to = assignee_exists.username
             db.add(subtask)
             db.commit()
             db.refresh(subtask)
 
-            task.assigned_users.append(assignee)
-            task.subtasks.update({subtask})
+            task.assigned_users.append(assignee_exists)
+            # task.subtasks.append(subtask)
             db.add(task)
             db.commit()
             return jsonify({'message': 'subtask assigned to user'}), status.HTTP_200_OK
@@ -205,107 +241,114 @@ def assign_subtask(assign_to, task_name, subtask_title):
 
     except IntegrityError as e:
         db.rollback()
-        return jsonify(
-            message=f"Task: {subtask_title}, has been previously assigned for user: {assign_to}"),\
-            status.HTTP_400_BAD_REQUEST
+        return jsonify(message="Task has been previously assigned to user"), status.HTTP_400_BAD_REQUEST
 
 
-@jwt_required()
 def unassign_subtask(unassign_from, task_name, subtask_title):
+    """
+        It takes request and parameters and unassigns
+        the subtask
+        :param unassign_from: The name of the user to be unassigned subtask
+        :param task_name: The name of the task
+        :param subtask_title: The title of the subtask
+        :return: A Response Object.
+    """
     try:
-        task = db.query(Task).filter(Task.name == task_name).first()
+        task = db.query(Task).filter(Task.task_name == task_name).first()
         assigned = db.query(User).filter(User.username == unassign_from).first()
         if not task or not assigned:
             return jsonify({'message': 'Task or User not found'}), status.HTTP_404_NOT_FOUND
 
         subtask = db.query(Subtask).filter(Subtask.task == task,
                                            Subtask.title == subtask_title,
-                                           Subtask.assigned_to == assigned).first()
+                                           Subtask.task_id == task.id,
+                                           Subtask.assigned_to == assigned.username).first()
 
-        prev_assigned_subtask = db.query(AssignedTasks) \
-            .filter(AssignedTasks.user_id == assigned.id,
-                    AssignedTasks.subtasks_id == subtask.id
-                    ).first()
+        if subtask:
+            prev_assigned_subtask = db.query(AssignedTasks) \
+                .filter(AssignedTasks.user_id == assigned.id,
+                        AssignedTasks.task_id == task.id,
+                        AssignedTasks.subtask_id == subtask.id
+                        ).first()
 
-        db.delete(prev_assigned_subtask)
-        db.commit()
+            db.delete(prev_assigned_subtask)
+            db.commit()
 
-        subtask.assigned_to = None
-        db.add(subtask)
-        db.commit()
-        db.refresh(subtask)
+            subtask.assigned_to = None
+            db.add(subtask)
+            db.commit()
+            db.refresh(subtask)
 
-        task.assigned_users.remove(assigned)
-        task.subtasks.update({subtask})
-        db.add(task)
-        db.commit()
-        return jsonify({'message': 'subtask unassigned from user'}), status.HTTP_200_OK
-
+            if assigned in task.assigned_users:
+                task.assigned_users.remove(assigned)
+                # task.subtasks.update({subtask})
+                db.add(task)
+            db.commit()
+            return jsonify({'message': 'subtask unassigned from user'}), status.HTTP_200_OK
+        else:
+            return jsonify(error="subtask not found"), status.HTTP_404_NOT_FOUND
     except IntegrityError as e:
         db.rollback()
         return jsonify(message="Task already not assigned to user"), status.HTTP_400_BAD_REQUEST
 
 
-# Endpoint not necessary
-@jwt_required()
-def get_all_subtasks_assignees(username,
-                               task_name):  # This method will return the assignees of all subtasks for the task
+# EditStatus
+def update_subtask_status():
+    """
+        It takes in a request and input data, validates the input data
+        and updates a subtask status
+        :request body input_data: The data that is passed to the function
+        :return: A dictionary of updated subtask
+    """
+    username = request.form['username']
+    task_name = request.form['task_name']
+    subtask_title = request.form['subtask_title']
+    _status = request.form['_status']
     user = db.query(User).filter(User.username == username).first()
-    task = db.query(Task).filter(Task.name == task_name, Task.user_id == user.id).first()
-
-    assignees = [sub_task.assignee for sub_task in task.subtasks]
-
-    return jsonify(assignees=assignees), status.HTTP_201_CREATED
-
-
-# - username
-# - old_title
-# - new_title
-# - old_task_name
-# - new_task_name
-@jwt_required()  # EditStatus
-def update_subtask_status(username, task_name, subtask_title, _status):  # old task_name, old subtask_title
-    user = db.query(User).filter(User.username == username).first()
-    task = db.query(Task).filter(Task.name == task_name, Task.user_id == user.id).first()
+    task = db.query(Task).filter(Task.task_name == task_name, Task.user_id == user.id).first()
     sub_task = db.query(Subtask).filter(Subtask.title == subtask_title,
                                         Subtask.task_id == task.id).first()
-    sub_task.status = _status
 
-    db.add(sub_task)
-    db.commit()
-    db.refresh(sub_task)
+    if sub_task:
+        sub_task.status = _status
 
-    task.subtasks.update(sub_task)
-    db.add(task)
-    db.commit()
+        db.add(sub_task)
+        db.commit()
+        db.refresh(sub_task)
 
-    return jsonify(message="status updated successfully",
-                   subtask=sub_task), status.HTTP_201_CREATED
+        task.subtasks.append = sub_task
+        db.add(task)
+        db.commit()
 
-
-@jwt_required()
-def show_assigned_tasks(username):
-    # Retrieve all assigned tasks from the database
-    user_account = db.query(User).filter(User.username == username).first()
-    tasks_assigned = db.query(Task).filter(Task.user_id == user_account.id, Task.assigned_users is not None).all()
-
-    # Convert assigned tasks to a list of dictionaries for easy serialization
-    task_list = [task.to_json() for task in tasks_assigned]
-
-    # Return the list of assigned tasks in the response
-    return jsonify(assigned_tasks=task_list), status.HTTP_200_OK
+        return json_response(message="status updated successfully",
+                             subtask=sub_task.to_json()), status.HTTP_201_CREATED
+    return jsonify(error="Subtask not found"), status.HTTP_404_NOT_FOUND
 
 
-# view assigned users
-def show_assigned_users(username, task_name):
-    # Retrieve all assigned users from the database
-    user_account = db.query(User).filter(User.username == username)
-    task_assigned = db.query(Task).filter(Task.user_id == user_account.id,
-                                          Task.task_name == task_name,
-                                          Task.assigned_users is not None).first()
 
-    if task_assigned:
-        # Return the list of assigned users in task in the response
-        return jsonify(assigned_tasks=task_assigned.assigned_users.to_json()), status.HTTP_200_OK
+# Retrieves assigned users for subtasks
+def show_assigned_users_for_subtask(task_name, subtask_title):
+    """
+        It takes request and parameters and retrieves
+        all assigned subtask
+        :param task_name: The name of the task
+        :param subtask_title: The title of the subtask
+        :return: A Response Object.
+    """
+    task = db.query(Task).filter(Task.task_name == task_name).first()
+    subtask_assigned = db.query(Subtask).filter(Subtask.task_id == task.id,
+                                                Subtask.title == subtask_title).first()
 
-    return jsonify(message=f"No assigned user found for {task_name}"), status.HTTP_404_NOT_FOUND
+    if task and subtask_assigned:
+        get_subtask_assigned = db.query(AssignedTasks).filter(AssignedTasks.subtask_id == subtask_assigned.id).all()
+        if not get_subtask_assigned:
+            return jsonify(message="No subtasks assigned in task")
+
+        get_sub_tasks = [sub_task.to_json() for sub_task in get_subtask_assigned]
+
+        return jsonify(subtitle_name=subtask_title,
+                       task_name=task_name,
+                       assigned_subtasks=get_sub_tasks,
+                       assigned_to=subtask_assigned.assigned_to), status.HTTP_200_OK
+
+    return jsonify(message=f"No assigned user found for{subtask_title} in {task_name}"), status.HTTP_404_NOT_FOUND
