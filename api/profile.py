@@ -1,8 +1,7 @@
 from flask import request, jsonify
-from database import SessionLocal
-from models import User, Profile
+from settings.database import SessionLocal
+from .models import User, Profile
 from flask_api import status
-from flask_jwt_extended import jwt_required
 from sqlalchemy.exc import IntegrityError
 
 db = SessionLocal()
@@ -36,6 +35,8 @@ def update_profile():
         db.add(get_user)
         db.commit()
 
+        db.refresh(get_user_profile)
+
         return jsonify(my_profile=get_user_profile.to_dict()), 200
     except IntegrityError as e:
         db.rollback()
@@ -54,7 +55,7 @@ def get_profile(username):
 
         if not get_user_profile:
             return {"message": "Profile doesnt exist."}, status.HTTP_400_BAD_REQUEST
-        return jsonify(message=get_user_profile.to_json()), status.HTTP_200_OK
+        return jsonify(message=get_user_profile.to_dict()), status.HTTP_200_OK
     except IntegrityError as e:
         db.rollback()
         return jsonify(message=str(e)), status.HTTP_400_BAD_REQUEST

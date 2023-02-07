@@ -1,9 +1,8 @@
 from flask import request, jsonify
-from database import SessionLocal
-from models import User, Task, Subtask, AssignedTasks
+from settings.database import SessionLocal
+from .models import User, Task, Subtask, AssignedTasks
 from flask_api import status
 from sqlalchemy.exc import IntegrityError
-from flask_jwt_extended import jwt_required
 from dateutil.parser import parse
 from flask_json import json_response
 
@@ -48,8 +47,9 @@ def create_subtask():
         task.subtasks.append(new_subtask)
         db.add(task)
         db.commit()
+        db.refresh(new_subtask)
 
-        return jsonify(new_subtassk=new_subtask.to_json()), status.HTTP_200_OK
+        return jsonify(new_subtassk=new_subtask.to_dict()), status.HTTP_200_OK
 
     except IntegrityError as e:
         db.rollback()
@@ -100,7 +100,8 @@ def update_subtask():
 
                 db.add(user_task)
                 db.commit()
-                return jsonify(new_subtask=user_subtask.to_json())
+                db.refresh(user_subtask)
+                return jsonify(new_subtask=user_subtask.to_dict())
         return jsonify({'message': 'Task or user not found'}), status.HTTP_404_NOT_FOUND
 
     except IntegrityError as e:
@@ -126,7 +127,7 @@ def get_subtask(username, task_name, subtask_title):
                                                         Subtask.user_id == user.id,
                                                         Subtask.title == subtask_title).first()
             if get_user_subtask:
-                return jsonify(subtasks=get_user_subtask.to_json()), status.HTTP_200_OK
+                return jsonify(subtasks=get_user_subtask.to_dict()), status.HTTP_200_OK
             return jsonify(message="Subtask doesnt exist"), status.HTTP_404_NOT_FOUND
 
         return jsonify(message="user or subtask not found")
@@ -155,7 +156,7 @@ def get_all_subtasks(username, task_name):
 
         subtasks = db.query(Subtask).filter(Subtask.task_id == task.id).all()
         if subtasks:
-            all_subtasks = [sub.to_json() for sub in subtasks]
+            all_subtasks = [sub.to_dict() for sub in subtasks]
             #  _all_subtasks = json.dumps(subtasks, indent=4, cls=CustomEncoder)
 
             return json_response(message=all_subtasks), status.HTTP_200_OK
@@ -246,7 +247,7 @@ def assign_subtask(assign_to, task_name, subtask_title):
 
 def unassign_subtask(unassign_from, task_name, subtask_title):
     """
-        It takes request and parameters and unassigns
+        It takes request and parameters and unassigned
         the subtask
         :param unassign_from: The name of the user to be unassigned subtask
         :param task_name: The name of the task
@@ -321,7 +322,7 @@ def update_subtask_status():
         db.commit()
 
         return json_response(message="status updated successfully",
-                             subtask=sub_task.to_json()), status.HTTP_201_CREATED
+                             subtask=sub_task.to_dict()), status.HTTP_201_CREATED
     return jsonify(error="Subtask not found"), status.HTTP_404_NOT_FOUND
 
 
@@ -344,7 +345,7 @@ def show_assigned_users_for_subtask(task_name, subtask_title):
         if not get_subtask_assigned:
             return jsonify(message="No subtasks assigned in task")
 
-        get_sub_tasks = [sub_task.to_json() for sub_task in get_subtask_assigned]
+        get_sub_tasks = [sub_task.to_dict() for sub_task in get_subtask_assigned]
 
         return jsonify(subtitle_name=subtask_title,
                        task_name=task_name,

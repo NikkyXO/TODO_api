@@ -1,19 +1,14 @@
 from flask import request
-from database import SessionLocal
-from models import User, Connections
+from settings.database import SessionLocal
+from .models import User, Connections
 from sqlalchemy.exc import IntegrityError
 from flask_api import status
-from flask_jwt_extended import (
-    jwt_required
-)
 from flask import jsonify
 from sqlalchemy import exc
 
 
 db = SessionLocal()
 
-
-# review this
 
 def add_connection():
     """	 It adds the user connection to user account
@@ -36,12 +31,14 @@ def add_connection():
             new_connection = Connections(user_id=get_user.id,
                                          connected_user_id=user_to_be_connected.id,
                                          connection_type=c_type)
+            new_connection.connected_name = user_to_be_connected.username
             db.add(new_connection)
             db.commit()
             get_user.connections.append(new_connection)
             db.commit()
+            db.refresh(new_connection)
             return jsonify(message="Connection added",
-                           new_connection=new_connection.to_json()), status.HTTP_201_CREATED
+                           new_connection=new_connection.to_dict()), status.HTTP_201_CREATED
         return jsonify(message="Account or user to create connection not found "), status.HTTP_404_NOT_FOUND
 
     except IntegrityError as e:
@@ -98,7 +95,7 @@ def get_connected_users(username):
             return jsonify(message="Account not found ")
 
         connected_users = user.connections
-        _connected_users = [user.to_json() for user in connected_users]
+        _connected_users = [user.to_dict() for user in connected_users]
 
         return jsonify(connected_users=_connected_users), status.HTTP_201_CREATED
     except IntegrityError as e:
@@ -117,7 +114,7 @@ def get_all_users():
 
         if not all_users:
             return jsonify(message="No user exists")
-        users = [user.to_json() for user in all_users]
+        users = [user.to_dict() for user in all_users]
 
         return jsonify(users=users)
 

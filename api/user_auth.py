@@ -1,11 +1,11 @@
-from database import SessionLocal
-from models import User, Profile
+from settings.database import SessionLocal
+from .models import User, Profile
 from sqlalchemy.exc import IntegrityError
 from flask_api import status
 from flask_jwt_extended import (
     create_access_token, jwt_required
 )
-from flask import jsonify, request, abort
+from flask import jsonify, request
 
 db = SessionLocal()
 
@@ -54,12 +54,13 @@ def register():
             user_profile = Profile()
             user_profile.user_id = user.id
             user_profile.user = user
+            # user_profile.save()
             db.add(user_profile)
             db.commit()
 
             db.refresh(user)
 
-            return jsonify(user.to_json()), status.HTTP_201_CREATED
+            return jsonify(user.to_dict()), status.HTTP_201_CREATED
         except Exception as e:
             error_msg = "Can't create User: {}".format(e)
     return jsonify({'error': error_msg}), status.HTTP_400_BAD_REQUEST

@@ -155,7 +155,7 @@ components:
 paths:
   /user/register:
     post:
-      operationId: user_auth.register
+      operationId: api.user_auth.register
       tags:
         - "Authentication"
       summary: "Signs up a user"
@@ -172,7 +172,7 @@ paths:
           description: "User Successfully created"
   /user/login:
     post:
-      operationId: user_auth.login
+      operationId: api.user_auth.login
       tags:
         - "Authentication"
       summary: "Log in for access token "
@@ -189,7 +189,7 @@ paths:
           description: "Successfully logged in"
   /user/profile/update:
     put:
-      operationId: profile.update_profile
+      operationId: api.profile.update_profile
       tags:
         - Profile
       summary: "Updates a user profile"
@@ -208,7 +208,7 @@ paths:
           description: Profile Updated successfully
   /user/{username}/profile/get:
     get:
-      operationId: profile.get_profile
+      operationId: api.profile.get_profile
       tags:
         - Profile
       summary: "Retrieves a user profile"
@@ -226,7 +226,7 @@ paths:
           description: Profile Retrieved successfully
   /user/{username}/profile/delete:
     delete:
-      operationId: profile.delete_profile
+      operationId: api.profile.delete_profile
       tags:
         - Profile
       summary: "Deletes a user profile"
@@ -244,7 +244,7 @@ paths:
           description: Profile has been deleted successfully
   /user/task/create:
     post:
-      operationId: tasks.create_task
+      operationId: api.tasks.create_task
       tags:
         - Task
       summary: "Creates a Task"
@@ -263,7 +263,7 @@ paths:
           description: Task Created successfully
   /users/task/all:
     get:
-      operationId: tasks.get_all_tasks
+      operationId: api.tasks.get_all_tasks
       tags:
         - Task
       summary: "Gets all tasks"
@@ -272,7 +272,7 @@ paths:
           description: tasks retrieved successfully
   /user/task/update:
     put:
-      operationId: tasks.update_task
+      operationId: api.tasks.update_task
       tags:
         - Task
       summary: "Updates a user Task"
@@ -291,7 +291,7 @@ paths:
           description: Profile Retrieved successfully
   /user/{username}/tasks/{task_name}/get:
     get:
-      operationId: tasks.get_task
+      operationId: api.tasks.get_task
       tags:
         - Task
       summary: "Retrieves a user task"
@@ -315,7 +315,7 @@ paths:
           description: Task Retrieved successfully
   /user/{username}/tasks/get/all:
     get:
-      operationId: tasks.get_all_user_tasks
+      operationId: api.tasks.get_all_user_tasks
       tags:
         - Task
       summary: "Retrieves all user's task"
@@ -333,7 +333,7 @@ paths:
           description: Task Retrieved successfully
   /user/{username}/tasks/{task_name}/delete:
     delete:
-      operationId: tasks.delete_task
+      operationId: api.tasks.delete_task
       tags:
         - Task
       summary: "Deletes a user's Task"
@@ -357,7 +357,7 @@ paths:
           description: Task has been deleted successfully
   /user/{username}/tasks/delete/all:
     delete:
-      operationId: tasks.clear_all_user_tasks
+      operationId: api.tasks.clear_all_user_tasks
       tags:
         - Task
       summary: "Deletes all user's Tasks"
@@ -375,7 +375,7 @@ paths:
           description: User Tasks has been deleted successfully
   /user/tasks/{task_name}/assign/{assign_to}:
     put:
-      operationId: tasks.assign_task
+      operationId: api.tasks.assign_task
       tags:
         - Task Assign
       summary: "Assign tasks"
@@ -399,7 +399,7 @@ paths:
           description: User Task has been assigned successfully
   /user/tasks/{task_name}/unassign/{unassigned_from}:
     put:
-      operationId: tasks.unassign_task
+      operationId: api.tasks.unassign_task
       tags:
         - Task Assign
       summary: "Unassign tasks"
@@ -423,7 +423,7 @@ paths:
           description: User Task has been successfully unassigned
   /user/task/subtask/create:
     post:
-      operationId: subtasks.create_subtask
+      operationId: api.subtasks.create_subtask
       tags:
         - Subtask
       summary: "creates a subtask"
@@ -442,7 +442,7 @@ paths:
           description: User SubTask has been successfully created
   /user/tasks/subtask/update:
     put:
-      operationId: subtasks.update_subtask
+      operationId: api.subtasks.update_subtask
       tags:
         - Subtask
       summary: "updates a subtask"
@@ -461,7 +461,7 @@ paths:
           description: User SubTask has been successfully updated
   /user/{username}/task/{task_name}/subtask/{subtask_title}/get:
     get:
-      operationId: subtasks.get_subtask
+      operationId: api.subtasks.get_subtask
       tags:
         - Subtask
       summary: "Retrieves a user subtask"
@@ -491,7 +491,7 @@ paths:
           description: subtask Retrieved successfully
   /user/{username}/tasks/{task_name}/subtask/all:
     get:
-      operationId: subtasks.get_all_subtasks
+      operationId: api.subtasks.get_all_subtasks
       tags:
         - Subtask
       summary: "Retrieves all user subtask"
@@ -515,7 +515,7 @@ paths:
           description: all subtasks Retrieved successfully
   /user/{username}/task/{task_name}/subtask/{subtask_title}/delete:
     delete:
-      operationId: subtasks.delete_subtask
+      operationId: api.subtasks.delete_subtask
       tags:
         - Subtask
       summary: "Deletes a user subtask"
@@ -545,7 +545,7 @@ paths:
           description: subtask Delete successfully
   /user/tasks/{task_name}/subtask/{subtask_title}/assign/{assign_to}:
     put:
-      operationId: subtasks.assign_subtask
+      operationId: api.subtasks.assign_subtask
       tags:
         - Subtask Assign
       summary: "Assigns a user subtask"
@@ -575,7 +575,7 @@ paths:
           description: subtask assigned successfully
   /user/tasks/{task_name}/subtask/{subtask_title}/unassign/{unassign_from}:
     put:
-      operationId: subtasks.unassign_subtask
+      operationId: api.subtasks.unassign_subtask
       tags:
         - Subtask Assign
       summary: "Unassign a user subtask"
@@ -605,7 +605,7 @@ paths:
           description: subtask assigned successfully
   /user/task/subtask/status:
     put:
-      operationId: subtasks.update_subtask_status
+      operationId: api.subtasks.update_subtask_status
       tags:
         - Update Status
       summary: "Updates a user subtask status"
@@ -624,7 +624,7 @@ paths:
           description: subtask status updated successfully
   /user/{assignee}/tasks/assigned/all:
     get:
-      operationId: tasks.show_assigned_tasks
+      operationId: api.tasks.show_assigned_tasks
       tags:
         - Task Assign
       summary: "Retrieves a list of assigned tasks"
@@ -642,7 +642,7 @@ paths:
           description: list of assigned tasks retrieved successfully
   /user/tasks/{task_name}assigned/all:
     get:
-      operationId: tasks.show_assigned_users
+      operationId: api.tasks.show_assigned_users
       tags:
         - Task Assign
       summary: "Retrieves a list of assigned users for a task"
@@ -660,7 +660,7 @@ paths:
           description: list of assigned users retrieved successfully
   /user/tasks/{task_name}/subtask/{subtask_title}/assigned/all:
     get:
-      operationId: subtasks.show_assigned_users_for_subtask
+      operationId: api.subtasks.show_assigned_users_for_subtask
       tags:
         - Subtask Assign
       summary: "Retrieves a list of assigned users for a subtask"
@@ -684,7 +684,7 @@ paths:
           description: list of assigned users retrieved successfully
   /user/connections/add:
     post:
-      operationId: connections.add_connection
+      operationId: api.connections.add_connection
       tags:
         - Users
       summary: "Adds a connection to a user"
@@ -703,7 +703,7 @@ paths:
           description: connection added successfully
   /user/{username}/connections:
     get:
-      operationId: connections.get_connected_users
+      operationId: api.connections.get_connected_users
       tags:
         - Users
       summary: "Gets all connected users"
@@ -721,7 +721,7 @@ paths:
           description: connections retrieved successfully
   /user/{username}/connections/{to_remove}:
     put:
-      operationId: connections.remove_connected_user
+      operationId: api.connections.remove_connected_user
       tags:
         - Users
       summary: "Removes a connected user"
@@ -745,7 +745,7 @@ paths:
           description: connection removed successfully
   /users/all:
     get:
-      operationId: connections.get_all_users
+      operationId: api.connections.get_all_users
       tags:
         - Users
       summary: "Gets all users"

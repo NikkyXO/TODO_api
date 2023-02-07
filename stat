@@ -1,15 +1,15 @@
 tasks:
 **************
 (nike)
-name: gamer, developers, superhero, Dawny
-title: gamers life is real, developer life is hard, Superheroes are real, A new Dawn has come
+name: game, developers, superhero, Dawny
+title: gamers life is good, developer life is hard, Superheroes are real, A new Dawn has come
 
 
 
 substasks:
 *********************
-taskname: (gamer, nike)
-subtitle: game content king, game is for 12, the gamers life, i love games
+taskname: (game, nike)
+subtitle: game content king,game content queen,  game is for 12, the gamers life, i love games
 
 taskname: (developers, nike)
 subtitle: i love to code, i use python to code
@@ -18,7 +18,7 @@ users:
 **********************
 
 
-username: nike, tomi, elis, seun, ade
+username: nike, tomi, elis, seun, ola, ade
 current: nike
 
 

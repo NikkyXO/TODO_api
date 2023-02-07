@@ -1,8 +1,9 @@
 from flask import request, jsonify
-from database import SessionLocal
-from models import User, Task, Subtask, AssignedTasks
+from settings.database import SessionLocal
+from .models import User, Task, Subtask, AssignedTasks
 from flask_api import status
 from sqlalchemy.exc import IntegrityError
+import sqlalchemy as sa
 
 db = SessionLocal()
 
@@ -35,9 +36,12 @@ def create_task():
         )
 
         db.add(user_task)
+        db.query(Task).group_by(sa.func.year(user_task.created_at), sa.func.month(Task.created_at))
         db.commit()
+
         db.refresh(user_task)
-        return jsonify(message="Task created successfully", detail=user_task.to_json())
+
+        return jsonify(message="Task created successfully", detail=user_task.to_dict())
 
     except IntegrityError as e:
         db.rollback()
@@ -60,7 +64,7 @@ def get_task(username, task_name):
             if not get_user_task:
                 return jsonify(error="Task doesnt exist"), status.HTTP_404_NOT_FOUND
 
-            return jsonify(task=get_user_task.to_json()), status.HTTP_200_OK
+            return jsonify(task=get_user_task.to_dict()), status.HTTP_200_OK
 
         return jsonify(error="User doesnt exist"), status.HTTP_404_NOT_FOUND
 
@@ -81,7 +85,7 @@ def get_all_user_tasks(username):
 
         if get_user:
             user_tasks = db.query(Task).filter(Task.user_id == get_user.id).all()
-            all_tasks = [task.to_json() for task in user_tasks]
+            all_tasks = [task.to_dict() for task in user_tasks]
 
             return jsonify(task=all_tasks), 200
         return jsonify(message="No tasks found for user")
@@ -101,7 +105,7 @@ def get_all_tasks():
         if not all_tasks:
             return jsonify(error="No tasks found"), status.HTTP_404_NOT_FOUND
 
-        tasks = [task.to_json() for task in all_tasks]
+        tasks = [task.to_dict() for task in all_tasks]
 
         return jsonify(tasks=tasks)
 
@@ -133,7 +137,7 @@ def update_task():
             db.add(get_user_task)
             db.commit()
             db.refresh(get_user_task)
-            return jsonify(user_task=get_user_task.to_json())
+            return jsonify(user_task=get_user_task.to_dict())
         return jsonify(message=f"No Task for {old_task_name}")
 
     except IntegrityError as e:
@@ -286,7 +290,7 @@ def show_assigned_tasks(assignee):
         get_assigned_tasks = assignee_account.assigned_tasks
 
         # Convert assigned tasks to a list of dictionaries for easy serialization
-        task_list = [task.to_json() for task in get_assigned_tasks]
+        task_list = [task.to_dict() for task in get_assigned_tasks]
 
         # Return the list of assigned tasks in the response
         return jsonify(assigned_to=assignee, assigned_tasks=task_list), status.HTTP_200_OK
@@ -308,7 +312,7 @@ def show_assigned_users(task_name):
     if task_assigned:
         # Return the list of assigned users in task in the response
         users_assigned = task_assigned.assigned_users
-        get_assignees = [user.to_json() for user in users_assigned if user is not None]
+        get_assignees = [user.to_dict() for user in users_assigned if user is not None]
 
         return jsonify(task_name=task_name,
                        assigned_users=get_assignees), status.HTTP_200_OK

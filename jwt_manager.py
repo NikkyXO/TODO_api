@@ -1,7 +1,4 @@
 from flask_jwt_extended import JWTManager, decode_token
-from models import User
-from flask import request
-import asyncio
 
 jwt = JWTManager()
 
