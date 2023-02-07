@@ -1,21 +1,18 @@
 from sqlalchemy import create_engine
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from flask import Flask
 import os
 
 
+SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
 
-app = Flask(__name__)
-
-
-SQLALCHEMY_DATABASE_URI = "mysql+mysqldb://root:410208olA$$$@localhost/todoApp_db"
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
+
 
 def get_db():
     db = SessionLocal()
@@ -23,5 +20,6 @@ def get_db():
         yield db
     finally:
         db.close()
+
 
 Base.metadata.create_all(bind=engine)

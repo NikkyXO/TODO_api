@@ -3,7 +3,6 @@ info:
   title: "RP Flask REST API"
   description: "An API about todo Application"
   version: "1.0.0"
-
 servers:
   - url: "/api"
 components:
@@ -67,8 +66,6 @@ components:
     EditTaskData:
       type: object
       properties:
-        username:
-          type: string
         old_title:
           type: string
         new_title:
@@ -78,7 +75,6 @@ components:
         new_task_name:
           type: string
       required:
-        - username
         - old_title
         - new_title
         - old_task_name
@@ -133,31 +129,33 @@ components:
         - username
         - old_subtask_title
         - task_name
+    ConnectionData:
+      type: object
+      properties:
+        username:
+          type: string
+        to_add:
+          type: string
+        c_type:
+          type: string
+          enum:
+            - clients
+            - colleagues
+            - mentors
+      required:
+        - username
+        - to_add
+        - c_type
   securitySchemes:
     jwt_auth:
       type: http
       scheme: bearer
       bearerFormat: JWT
       x-bearerInfoFunc: jwt_manager.security_handler
-  parameters:
-    username:
-      name: "username"
-      description: "username of the person to get"
-      in: path
-      required: True
-      schema:
-        type: "string"
-    email:
-      name: "email"
-      description: "email of the person to get"
-      in: path
-      required: True
-      schema:
-        type: "string"
 paths:
   /user/register:
     post:
-      operationId: user_auth.register
+      operationId: api.user_auth.register
       tags:
         - "Authentication"
       summary: "Signs up a user"
@@ -174,7 +172,7 @@ paths:
           description: "User Successfully created"
   /user/login:
     post:
-      operationId: user_auth.login
+      operationId: api.user_auth.login
       tags:
         - "Authentication"
       summary: "Log in for access token "
@@ -191,7 +189,7 @@ paths:
           description: "Successfully logged in"
   /user/profile/update:
     put:
-      operationId: profile.update_profile
+      operationId: api.profile.update_profile
       tags:
         - Profile
       summary: "Updates a user profile"
@@ -210,10 +208,10 @@ paths:
           description: Profile Updated successfully
   /user/{username}/profile/get:
     get:
-      operationId: profile.get_profile
+      operationId: api.profile.get_profile
       tags:
         - Profile
-      summary: "Retreives a user profile"
+      summary: "Retrieves a user profile"
       parameters:
         - name: username
           in: path
@@ -225,17 +223,17 @@ paths:
         - jwt_auth: []
       responses:
         '200':
-          description: Profile Retreived successfully
+          description: Profile Retrieved successfully
   /user/{username}/profile/delete:
     delete:
-      operationId: profile.delete_profile
+      operationId: api.profile.delete_profile
       tags:
         - Profile
       summary: "Deletes a user profile"
       parameters:
         - name: username
           in: path
-          description: The username of the profile to retrieve
+          description: The username of the profile to delete
           required: true
           schema:
             type: string
@@ -246,7 +244,7 @@ paths:
           description: Profile has been deleted successfully
   /user/task/create:
     post:
-      operationId: tasks.create_task
+      operationId: api.tasks.create_task
       tags:
         - Task
       summary: "Creates a Task"
@@ -263,9 +261,18 @@ paths:
       responses:
         '200':
           description: Task Created successfully
+  /users/task/all:
+    get:
+      operationId: api.tasks.get_all_tasks
+      tags:
+        - Task
+      summary: "Gets all tasks"
+      responses:
+        '200':
+          description: tasks retrieved successfully
   /user/task/update:
     put:
-      operationId: tasks.update_task
+      operationId: api.tasks.update_task
       tags:
         - Task
       summary: "Updates a user Task"
@@ -281,10 +288,10 @@ paths:
         - jwt_auth: [ ]
       responses:
         '200':
-          description: Profile Retreived successfully
+          description: Profile Retrieved successfully
   /user/{username}/tasks/{task_name}/get:
     get:
-      operationId: tasks.get_task
+      operationId: api.tasks.get_task
       tags:
         - Task
       summary: "Retrieves a user task"
@@ -308,7 +315,7 @@ paths:
           description: Task Retrieved successfully
   /user/{username}/tasks/get/all:
     get:
-      operationId: tasks.get_all_tasks
+      operationId: api.tasks.get_all_user_tasks
       tags:
         - Task
       summary: "Retrieves all user's task"
@@ -326,7 +333,7 @@ paths:
           description: Task Retrieved successfully
   /user/{username}/tasks/{task_name}/delete:
     delete:
-      operationId: tasks.delete_task
+      operationId: api.tasks.delete_task
       tags:
         - Task
       summary: "Deletes a user's Task"
@@ -350,7 +357,7 @@ paths:
           description: Task has been deleted successfully
   /user/{username}/tasks/delete/all:
     delete:
-      operationId: tasks.clear_all_user_tasks
+      operationId: api.tasks.clear_all_user_tasks
       tags:
         - Task
       summary: "Deletes all user's Tasks"
@@ -368,9 +375,9 @@ paths:
           description: User Tasks has been deleted successfully
   /user/tasks/{task_name}/assign/{assign_to}:
     put:
-      operationId: tasks.assign_task
+      operationId: api.tasks.assign_task
       tags:
-        - Assign
+        - Task Assign
       summary: "Assign tasks"
       parameters:
         - name: assign_to
@@ -381,7 +388,7 @@ paths:
             type: string
         - name: task_name
           in: path
-          description: Assign task to a user
+          description: task name to assign
           required: true
           schema:
             type: string
@@ -392,9 +399,9 @@ paths:
           description: User Task has been assigned successfully
   /user/tasks/{task_name}/unassign/{unassigned_from}:
     put:
-      operationId: tasks.unassign_task
+      operationId: api.tasks.unassign_task
       tags:
-        - Assign
+        - Task Assign
       summary: "Unassign tasks"
       parameters:
         - name: unassigned_from
@@ -405,7 +412,7 @@ paths:
             type: string
         - name: task_name
           in: path
-          description: Unassign task to a user
+          description: name of task
           required: true
           schema:
             type: string
@@ -416,7 +423,7 @@ paths:
           description: User Task has been successfully unassigned
   /user/task/subtask/create:
     post:
-      operationId: subtasks.create_subtask
+      operationId: api.subtasks.create_subtask
       tags:
         - Subtask
       summary: "creates a subtask"
@@ -435,7 +442,7 @@ paths:
           description: User SubTask has been successfully created
   /user/tasks/subtask/update:
     put:
-      operationId: subtasks.update_subtask
+      operationId: api.subtasks.update_subtask
       tags:
         - Subtask
       summary: "updates a subtask"
@@ -454,7 +461,7 @@ paths:
           description: User SubTask has been successfully updated
   /user/{username}/task/{task_name}/subtask/{subtask_title}/get:
     get:
-      operationId: subtasks.get_subtask
+      operationId: api.subtasks.get_subtask
       tags:
         - Subtask
       summary: "Retrieves a user subtask"
@@ -484,7 +491,7 @@ paths:
           description: subtask Retrieved successfully
   /user/{username}/tasks/{task_name}/subtask/all:
     get:
-      operationId: subtasks.get_all_subtasks
+      operationId: api.subtasks.get_all_subtasks
       tags:
         - Subtask
       summary: "Retrieves all user subtask"
@@ -508,7 +515,7 @@ paths:
           description: all subtasks Retrieved successfully
   /user/{username}/task/{task_name}/subtask/{subtask_title}/delete:
     delete:
-      operationId: subtasks.delete_subtask
+      operationId: api.subtasks.delete_subtask
       tags:
         - Subtask
       summary: "Deletes a user subtask"
@@ -538,14 +545,14 @@ paths:
           description: subtask Delete successfully
   /user/tasks/{task_name}/subtask/{subtask_title}/assign/{assign_to}:
     put:
-      operationId: subtasks.assign_subtask
+      operationId: api.subtasks.assign_subtask
       tags:
-        - Assign
+        - Subtask Assign
       summary: "Assigns a user subtask"
       parameters:
         - name: assign_to
           in: path
-          description: The username of the user that is about to be assigned subtask
+          description: The name of the user to be assigned subtask
           required: true
           schema:
             type: string
@@ -568,14 +575,14 @@ paths:
           description: subtask assigned successfully
   /user/tasks/{task_name}/subtask/{subtask_title}/unassign/{unassign_from}:
     put:
-      operationId: subtasks.unassign_subtask
+      operationId: api.subtasks.unassign_subtask
       tags:
-        - Assign
+        - Subtask Assign
       summary: "Unassign a user subtask"
       parameters:
         - name: unassign_from
           in: path
-          description: The username of the user that is about to be unassigned subtask
+          description: The name of the user  to be unassigned subtask
           required: true
           schema:
             type: string
@@ -598,7 +605,7 @@ paths:
           description: subtask assigned successfully
   /user/task/subtask/status:
     put:
-      operationId: subtasks.update_subtask_status
+      operationId: api.subtasks.update_subtask_status
       tags:
         - Update Status
       summary: "Updates a user subtask status"
@@ -615,16 +622,16 @@ paths:
       responses:
         '200':
           description: subtask status updated successfully
-  /user/{username}/tasks/assigned/all:
+  /user/{assignee}/tasks/assigned/all:
     get:
-      operationId: subtasks.show_assigned_tasks
+      operationId: api.tasks.show_assigned_tasks
       tags:
-        - Assign
+        - Task Assign
       summary: "Retrieves a list of assigned tasks"
       parameters:
-        - name: username
+        - name: assignee
           in: path
-          description: The username of the profile
+          description: The username of the assignee
           required: true
           schema:
             type: string
@@ -633,19 +640,13 @@ paths:
       responses:
         '200':
           description: list of assigned tasks retrieved successfully
-  /user/{username}/tasks/{task_name}assigned/all:
+  /user/tasks/{task_name}assigned/all:
     get:
-      operationId: subtasks.show_assigned_users
+      operationId: api.tasks.show_assigned_users
       tags:
-        - Assign
+        - Task Assign
       summary: "Retrieves a list of assigned users for a task"
       parameters:
-        - name: username
-          in: path
-          description: The username of the account
-          required: true
-          schema:
-            type: string
         - name: task_name
           in: path
           description: The task_name of the task
@@ -657,28 +658,22 @@ paths:
       responses:
         '200':
           description: list of assigned users retrieved successfully
-  /user/{username}/connections/{to_add}/{c_type}:
-    post:
-      operationId: connections.add_connection
+  /user/tasks/{task_name}/subtask/{subtask_title}/assigned/all:
+    get:
+      operationId: api.subtasks.show_assigned_users_for_subtask
       tags:
-        - Connection
-      summary: "Adds a connection to a user"
+        - Subtask Assign
+      summary: "Retrieves a list of assigned users for a subtask"
       parameters:
-        - name: username
+        - name: task_name
           in: path
-          description: The username of the account
+          description: The name of the task
           required: true
           schema:
             type: string
-        - name: to_add
+        - name: subtask_title
           in: path
-          description: The name of the new connection
-          required: true
-          schema:
-            type: string
-        - name: c_type
-          in: path
-          description: The connection type to be added
+          description: The title of the subtask
           required: true
           schema:
             type: string
@@ -686,12 +681,31 @@ paths:
         - jwt_auth: [ ]
       responses:
         '200':
+          description: list of assigned users retrieved successfully
+  /user/connections/add:
+    post:
+      operationId: api.connections.add_connection
+      tags:
+        - Users
+      summary: "Adds a connection to a user"
+      requestBody:
+        description: "Add connection"
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              x-body-name: "connect"
+              $ref: "#/components/schemas/ConnectionData"
+      security:
+        - jwt_auth: [ ]
+      responses:
+        '200':
           description: connection added successfully
   /user/{username}/connections:
     get:
-      operationId: connections.get_connected_users
+      operationId: api.connections.get_connected_users
       tags:
-        - Connection
+        - Users
       summary: "Gets all connected users"
       parameters:
         - name: username
@@ -700,7 +714,6 @@ paths:
           required: true
           schema:
             type: string
-
       security:
         - jwt_auth: [ ]
       responses:
@@ -708,9 +721,9 @@ paths:
           description: connections retrieved successfully
   /user/{username}/connections/{to_remove}:
     put:
-      operationId: connections.remove_connected_user
+      operationId: api.connections.remove_connected_user
       tags:
-        - Connection
+        - Users
       summary: "Removes a connected user"
       parameters:
         - name: username
@@ -730,9 +743,15 @@ paths:
       responses:
         '200':
           description: connection removed successfully
-
-
-
+  /users/all:
+    get:
+      operationId: api.connections.get_all_users
+      tags:
+        - Users
+      summary: "Gets all users"
+      responses:
+        '200':
+          description: users retrieved successfully
 
 
 

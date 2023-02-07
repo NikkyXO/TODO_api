@@ -1,48 +1,33 @@
-{
-  "my_profile": {
-    "about_me": "i love red jeans and huzzle",
-    "username": "tomi"
-  }
-}
-{
-  "task": [
-    {
-      "assigned_users": [],
-      "id": "d7657da0-0a75-4009-9e4e-c0866df3acbe",
-      "month": 1,
-      "subtasks": [],
-      "task_name": "domestic",
-      "title": "the red hat is domestic",
-      "user_id": "0318cc54-b4ca-48cd-b9ac-74dbff75f1ba"
-    },
-    {
-      "assigned_users": [],
-      "id": "eaf82169-0822-486b-8dab-26ff39226e44",
-      "month": 1,
-      "subtasks": [],
-      "task_name": "Redhat's game",
-      "title": "hate the game, but love it",
-      "user_id": "0318cc54-b4ca-48cd-b9ac-74dbff75f1ba"
-    }
+tasks:
+**************
+(nike)
+name: game, developers, superhero, Dawny
+title: gamers life is good, developer life is hard, Superheroes are real, A new Dawn has come
 
-"new_subtassk": {
-    "assigned_to": null,
-    "content": "flyovers are great",
-    "created": "2023-01-27T11:11:07",
-    "due_date": "2023-03-12 00:00:00",
-    "last_seen": "2023-01-27T11:11:07",
-    "task_id": "d7657da0-0a75-4009-9e4e-c0866df3acbe",
-    "title": "flyovers"
 
-"new_subtassk": {
-task_name: task1
-}
-    "assigned_to": null,
-    "content": "subtask1 content",
-    "created": "2023-01-27T16:53:31",
-    "due_date": "2023-01-31 00:00:00",
-    "last_seen": "2023-01-27T16:53:31",
-    "task_id": "ae402de2-4429-4032-a768-83c11a60d540",
-    "title": "subtask1 title"
-  }
-}
+
+substasks:
+*********************
+taskname: (game, nike)
+subtitle: game content king,game content queen,  game is for 12, the gamers life, i love games
+
+taskname: (developers, nike)
+subtitle: i love to code, i use python to code
+
+users:
+**********************
+
+
+username: nike, tomi, elis, seun, ola, ade
+current: nike
+
+
+
+Not tested:
+task: delete/all
+task:delete/task
+
+Review
+def show_assigned_users_for_subtask/Subtasks.py
+endpoint lags
+
