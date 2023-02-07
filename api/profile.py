@@ -48,7 +48,6 @@ def get_profile(username):
         :param username: The name of the user
         :return: A response object
     """
-
     try:
         get_user = db.query(User).filter(User.username == username).first()
         get_user_profile = db.query(Profile).filter(Profile.user_id == get_user.id).first()
@@ -66,7 +65,6 @@ def delete_profile(username):
         :param username: The name of the user
         :return: A response object
     """
-
     try:
         user_account = db.query(User).filter(User.username == username).first()
         if user_account:

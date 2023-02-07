@@ -3,6 +3,7 @@ import connexion
 from settings.config import Config
 from settings.database import Base, engine
 from jwt_manager import jwt
+import os
 
 options = {'swagger_ui': True,
            'strict_validation': True,
@@ -16,7 +17,6 @@ app = connexion_app.app
 
 app.config.from_object(Config)
 
-app.config['SECRET_KEY'] = "d8548793446a4d1f9b369f9d6f1b722f"
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 app.config['JSON_ADD_STATUS'] = True
 app.config['JSON_STATUS_FIELD_NAME'] = 'status'

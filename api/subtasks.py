@@ -326,7 +326,6 @@ def update_subtask_status():
     return jsonify(error="Subtask not found"), status.HTTP_404_NOT_FOUND
 
 
-
 # Retrieves assigned users for subtasks
 def show_assigned_users_for_subtask(task_name, subtask_title):
     """

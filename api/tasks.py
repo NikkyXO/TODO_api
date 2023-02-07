@@ -174,9 +174,9 @@ def delete_task(username, task_name):
 
 def clear_all_user_tasks(username):
     """
-            It deletes all tasks for a user
-            :param username: The name of the user
-            :return: A Response Object.
+        It deletes all tasks for a user
+        :param username: The name of the user
+        :return: A Response Object.
     """
     try:
         get_user = db.query(User).filter(User.username == username).first()
@@ -283,7 +283,6 @@ def show_assigned_tasks(assignee):
         :param assignee: The name of the user with assigned tasks
         :return: A Response Object.
     """
-
     assignee_account = db.query(User).filter(User.username == assignee).first()
 
     if assignee_account:

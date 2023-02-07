@@ -4,9 +4,8 @@ from settings.database import Base, SessionLocal
 from hashlib import md5
 from sqlalchemy.orm import relationship
 from sqlalchemy import (
-    DateTime, Integer, String, ForeignKey, Column, Enum, MetaData
+    DateTime, String, ForeignKey, Column, Enum, MetaData
 )
-from sqlalchemy.sql import func
 
 time = "%Y-%m-%dT%H:%M:%S.%f"
 
@@ -44,12 +43,6 @@ class BaseModel:
     def __str__(self):
         """String representation of the BaseModel class"""
         return f"{self.__class__.__name__}, {self.id}, {self.__dict__}"
-
-    def save(self):
-        """updates the attribute 'updated_at' with the current datetime"""
-        self.updated_at = datetime.utcnow()
-        db.add(self)
-        db.commit()
 
     def to_dict(self):
         """returns a dictionary containing all keys/values of the instance"""

@@ -1,16 +1,11 @@
 from sqlalchemy import create_engine
-from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from flask import Flask
 import os
 
-app = Flask(__name__)
 
-SQLALCHEMY_DATABASE_URI = "mysql+mysqldb://root:410208olA$$$@localhost/todoApp_db"
-
-# SQLALCHEMY_DATABASE_URI =
-# "mysql+mysqldb://olapeju:410208olA$@olapeju.mysql.pythonanywhere-services.com/olapeju$default"
+SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')
 
 engine = create_engine(SQLALCHEMY_DATABASE_URI)
 
