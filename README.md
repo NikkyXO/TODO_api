@@ -32,8 +32,3 @@
  - OOP concepts
  - good naming conventions
  - Api documentation
-
-corrections needed
----------------------
-revise subtasks, assign (schema data)
-task assign,{missing parameters}
